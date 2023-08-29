@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+html {
+    height: 100%;
+    background: #f0f0f0;
+}
+
+#calculator {
+    width: 220px;
+    margin: 100px auto;
+    padding: 10px;
+    background: #2ae6e6;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: #333;
+}
+
+.top span.clear {
+    background: #ff6b6b;
+    color: white;
+}
+
+.screen {
+    height: 40px;
+    width: 100%;
+    padding: 5px 10px;
+    background: white;
+    color: #333;
+    text-align: right;
+}
+
+.keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 5px;
+    padding: 10px;
+}
+
+.keys span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    background: whitesmoke;
+    border-radius: 3px;
+    color: blue;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.keys span:hover {
+    background: #888;
+}
+
+ </style>
+</head>
+
+<div id="calculator">
+	 <div class="top">
+		<span class="clear">C</span>
+		<div class="screen">
+            <input id="inputField" type="text" readonly>
+        </div>
+	</div>
+	
+	<div class="keys">
+	
+		<span>7</span>
+		<span>8</span>
+		<span>9</span>
+		<span class="operator">+</span>
+		<span>4</span>
+		<span>5</span>
+		<span>6</span>
+		<span class="operator">-</span>
+		<span>1</span>
+		<span>2</span>
+		<span>3</span>
+		<span class="operator">÷</span>
+		<span>0</span>
+		<span>.</span>
+		<span class="eval">=</span>
+		<span class="operator">x</span>
+        <span class="memory" data-key="M+" onclick="addToMemory()">M+</span>
+        <span class="memory" data-key="M-" onclick="subtractFromMemory()">M-</span>
+        <span class="memory" data-key="MR" onclick="recallMemory()">MR</span>
+        <span class="memory" data-key="MC" onclick="clearMemory()">MC</span>
+	</div>
+</div>
+<script>
+    var input = document.getElementById('inputField');
+    var keys = document.querySelectorAll('#calculator span');
+    var operators = ['+', '-', 'x', '÷'];
+    var decimalAdded = false;
+    var memoryValue = 0;
+
+for (var i = 0; i < keys.length; i++) {
+	keys[i].onclick = function(e) {
+	
+		var input = document.querySelector('.screen');
+		var inputVal = input.innerHTML;
+		var btnVal = this.innerHTML;
+		
+	
+		if (btnVal == 'C') {
+			input.innerHTML = '';
+			decimalAdded = false;
+		} else if(btnVal == '=') {
+			var equation = inputVal;
+			var lastChar = equation[equation.length - 1];
+			
+			
+			equation = equation.replace(/x/g, '*').replace(/÷/g, '/');
+			
+			
+			if (operators.indexOf(lastChar) > -1 || lastChar == '.')
+				equation = equation.replace(/.$/, '');
+			
+			if (equation)
+				input.innerHTML = eval(equation);
+				
+			decimalAdded = false;
+		} else if (operators.indexOf(btnVal) > -1) {
+		
+			
+			if (inputVal != '' && operators.indexOf(lastChar) == -1) 
+				input.innerHTML += btnVal;
+			
+		
+			else if (inputVal == '' && btnVal == '-') 
+				input.innerHTML += btnVal;
+			
+			
+			if (operators.indexOf(lastChar) > -1 && inputVal.length > 1) {
+				
+				input.innerHTML = inputVal.replace(/.$/, btnVal);
+			}
+			
+			decimalAdded =false;
+		} else if (btnVal == '.') {
+			if (!decimalAdded) {
+				input.innerHTML += btnVal;
+	 			decimalAdded = true;
+			}
+		}
+		
+		
+		else {
+			input.innerHTML += btnVal;
+		}
+	
+		e.preventDefault();
+	} 
+}
+
+        function addToMemory() {
+            var input = document.querySelector('.screen');
+            memoryValue += parseFloat(input.innerHTML);
+        };
+
+        function subtractFromMemory() {
+            var input = document.querySelector('.screen');
+            memoryValue -= parseFloat(input.innerHTML);
+        };
+
+        function recallMemory() {
+            var input = document.querySelector('.screen');
+            input.innerHTML = memoryValue;
+        };
+
+        function clearMemory() {
+            memoryValue = 0;
+        };
+        
+        function adjustPrecision(num) {
+            return parseFloat(num).toFixed(8);
+        };
+        document.addEventListener('keydown', function(e) {
+            var key = e.key;
+            if (key === 'Enter') key = '=';
+            if (key === 'Escape') key = 'C';
+            if (key === '*') key = 'x';
+            if (key === '/') key = '÷';
+            
+            if (!isNaN(key) || key === '.' || operators.includes(key) || key === '=') {
+                simulateButtonClick(key);
+            }
+        });
+
+        function simulateButtonClick(btnVal) {
+            var event = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            var target = document.querySelector('.keys span[data-key="' + btnVal + '"]');
+            if (target) {
+                target.dispatchEvent(event);
+            }
+        };
+</script>
